@@ -88,12 +88,19 @@ with tab2:
                 try:
                     client = ElevenLabs(api_key=elevenlabs_api_key)
                     
-                    voices_response = client.voices.get_all()
                     selected_voice_id = "21m00Tcm4TlvDq8ikWAM" # Default to Rachel
-                    for v in voices_response.voices:
-                        if v.name == voice_selection:
-                            selected_voice_id = v.voice_id
-                            break
+                    try:
+                        voices_response = client.voices.get_all()
+                        for v in voices_response.voices:
+                            if v.name == voice_selection:
+                                selected_voice_id = v.voice_id
+                                break
+                    except Exception as ve:
+                        # If API key lacks voices_read permission, fallback to Rachel
+                        if "voices_read" in str(ve) or "missing_permissions" in str(ve):
+                            st.warning(f"Your API key lacks 'voices_read' permission. Falling back to default voice (Rachel) instead of {voice_selection}.")
+                        else:
+                            raise ve
                             
                     audio_generator = client.text_to_speech.convert(
                         text=tts_text,
