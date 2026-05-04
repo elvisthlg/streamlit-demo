@@ -88,10 +88,18 @@ with tab2:
                 try:
                     client = ElevenLabs(api_key=elevenlabs_api_key)
                     
-                    audio_generator = client.generate(
+                    voices_response = client.voices.get_all()
+                    selected_voice_id = "21m00Tcm4TlvDq8ikWAM" # Default to Rachel
+                    for v in voices_response.voices:
+                        if v.name == voice_selection:
+                            selected_voice_id = v.voice_id
+                            break
+                            
+                    audio_generator = client.text_to_speech.convert(
                         text=tts_text,
-                        voice=voice_selection,
-                        model=elevenlabs_model
+                        voice_id=selected_voice_id,
+                        model_id=elevenlabs_model,
+                        output_format="mp3_44100_128"
                     )
                     
                     # Consume the generator into bytes
